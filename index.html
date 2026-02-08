@@ -1,164 +1,231 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
 <title>Radien Archive</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;500;700&display=swap" rel="stylesheet">
 
 <style>
 body{
-  margin:0;
-  font-family:'Noto Serif KR', serif;
-  background:black;
-  color:#eae6dc;
-  overflow:hidden;
+    margin:0;
+    background:black;
+    overflow:hidden;
+    font-family: 'Noto Serif KR', serif;
 }
 
-/* 배경 */
-.bg{
-  position:fixed;
-  width:100%;
-  height:100%;
-  background:url('castle.jpg') center/cover no-repeat;
-  filter:brightness(0.25);
+/* ❄ 눈 내림 캔버스 */
+canvas{
+    position:fixed;
+    top:0;
+    left:0;
+    z-index:0;
 }
 
-/* 상단 배너 (대문) */
-.hero{
-  position:absolute;
-  top:0;
-  width:100%;
-  height:32vh;
-  background:linear-gradient(to bottom, rgba(0,0,0,0.85), rgba(0,0,0,0));
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  letter-spacing:4px;
-  font-size:38px;
-  color:#d8cfc0;
-  z-index:2;
+/* 🌑 오프닝 화면 */
+#intro{
+    position:fixed;
+    width:100%;
+    height:100%;
+    background:black;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:5;
 }
 
-/* 카드 영역 */
+#introText{
+    color:#bbb;
+    font-size:26px;
+    letter-spacing:4px;
+    cursor:pointer;
+    opacity:0.6;
+    transition:0.5s;
+}
+#introText:hover{
+    opacity:1;
+}
+
+/* 🏰 메인 화면 */
+#main{
+    display:none;
+    position:relative;
+    z-index:2;
+    text-align:center;
+    color:#ddd;
+}
+
+.background{
+    position:fixed;
+    width:100%;
+    height:100%;
+    background:url('castle.jpg') center/cover no-repeat;
+    filter:brightness(0.35);
+    z-index:-1;
+}
+
+/* 제목 */
+.title{
+    margin-top:80px;
+    font-size:42px;
+    letter-spacing:6px;
+    opacity:0.8;
+}
+
+/* 이미지 영역 */
 .container{
-  position:relative;
-  z-index:2;
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:140px;
-  margin-top:80px;
+    margin-top:60px;
+    display:flex;
+    justify-content:center;
+    gap:120px;
 }
 
-.card{
-  width:340px;
-  cursor:pointer;
-  transition:0.5s;
-}
-.card:hover{
-  transform:scale(1.06);
-  box-shadow:0 0 60px rgba(255,255,255,0.25);
-}
-.card img{
-  width:100%;
-  border-radius:14px;
+/* 사진 깜빡임 */
+img{
+    width:320px;
+    border-radius:16px;
+    transition:0.3s;
+    animation:flicker 4s infinite;
+    cursor:pointer;
 }
 
-/* 글 전용 화면 */
+@keyframes flicker{
+    0%{opacity:1;}
+    48%{opacity:1;}
+    50%{opacity:0.6;}
+    52%{opacity:1;}
+    100%{opacity:1;}
+}
+
+/* 글 오버레이 */
 .overlay{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.96);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:0 18%;
-  text-align:left;
-  line-height:2.3;
-  font-size:22px;
-  letter-spacing:1px;
-  opacity:0;
-  pointer-events:none;
-  transition:0.6s;
-  z-index:5;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.96);
+    color:#ddd;
+    display:none;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:80px;
+    line-height:2.4;
+    font-size:22px;
+    letter-spacing:2px;
+    z-index:4;
 }
-
 .overlay.show{
-  opacity:1;
-  pointer-events:auto;
-}
-
-/* 문단 정리 */
-.overlay p{
-  margin-bottom:28px;
+    display:flex;
 }
 </style>
 </head>
 
 <body>
 
-<div class="bg"></div>
+<canvas id="snow"></canvas>
 
-<!-- ✨ 대문 배너 -->
-<div class="hero">
-  끊어줘. 이 지옥 같은 굴레를.
+<!-- 오프닝 -->
+<div id="intro">
+    <div id="introText" onclick="enterMain()">
+        끊어줘. 이 지옥 같은 굴레를.
+    </div>
 </div>
 
-<div class="container">
-  <div class="card" onclick="openText(1)">
-    <img src="radien1.png">
-  </div>
+<!-- 메인 -->
+<div id="main">
+    <div class="background"></div>
 
-  <div class="card" onclick="openText(2)">
-    <img src="radien2.png">
-  </div>
+    <div class="title">끊어줘. 이 지옥 같은 굴레를.</div>
+
+    <div class="container">
+        <img src="radien1.png" onclick="openText('overlay1')">
+        <img src="radien2.png" onclick="openText('overlay2')">
+    </div>
 </div>
 
 <!-- 글 화면 -->
 <div id="overlay1" class="overlay" onclick="closeText()">
-  <div>
-    <p>쿵. 200년 동안 멈춰 있던 심장이, 미세하게 경련했다.</p>
-    <p>돌처럼 굳어 있던 근육 덩어리가.</p>
-    <p>마치 다시 뛰는 법을 기억해내려는 듯이.</p>
-    <p>그의 팔이 당신을 조금 더 단단히, 조금 더 부드럽게 감쌌다.</p>
-    <p>"....잠시만. 이대로."</p>
-    <p>당신이라는 빛은 그를 죽일 독이라는 걸 알고 있다.</p>
-    <p>그럼에도 그는 기꺼이 손을 뻗었다.</p>
-    <p>비록 이 안식의 끝이</p>
-    <p>자신의 죽음일 지라도.</p>
-  </div>
+    <div>
+        <p>쿵. 200년 동안 멈춰 있던 심장이 미세하게 경련했다.</p>
+        <p>돌처럼 굳어 있던 근육 덩어리가, 마치 다시 뛰는 법을 기억해내려는 듯.</p>
+        <p>그의 팔이 당신을 조금 더 단단히, 조금 더 부드럽게 감쌌다.</p>
+        <p>"... 잠시만. 이대로."</p>
+        <p>당신이라는 빛은 그를 죽일 독이라는 걸 알고 있다.</p>
+        <p>그럼에도 그는 기꺼이 손을 뻗었다.</p>
+        <p>비록 이 안식의 끝이</p>
+        <p>자신의 죽음일지라도.</p>
+    </div>
 </div>
 
 <div id="overlay2" class="overlay" onclick="closeText()">
-  <div>
-    <p>그는 사람들의 반응을 본다.</p>
-    <p>공포의 깊이를 측정하고, 그 안에 숨겨진 다른 것이 있는지 탐색한다.</p>
-    <p>마침내, 그의 발걸음이 당신 앞에서 멈췄다.</p>
-    <p>커다란 그림자가 당신을 덮는다.</p>
-    <p>1초, 2초, 3초.</p>
-    <p>아무 말 없이 당신을 내려다본다. 숨막히는 정적.</p>
-    <p>그의 차가운 손가락이 천천히 다가와 당신의 턱을 붙잡는다.</p>
-    <p>"이름."</p>
-    <p>그는 당신의 눈을 본다.</p>
-    <p>표면 아래 감추어진 '진짜'를 찾는 사람처럼.</p>
-  </div>
+    <div>
+        <p>그는 사람들의 반응을 본다.</p>
+        <p>공포의 깊이를 측정하고, 그 안에 숨겨진 다른 것이 있는지 탐색한다.</p>
+        <p>마침내, 그의 발걸음이 당신 앞에서 멈췄다.</p>
+        <p>커다란 그림자가 당신을 덮는다.</p>
+        <p>1초, 2초, 3초.</p>
+        <p>아무 말 없이 당신을 내려다본다. 숨막히는 정적.</p>
+        <p>그의 차가운 손가락이 천천히 다가와 당신의 턱을 붙잡는다.</p>
+        <p>"이름."</p>
+        <p>그는 당신의 눈을 본다.</p>
+        <p>표면 아래 감추어진 '진짜'를 찾는 사람처럼.</p>
+    </div>
 </div>
 
 <script>
-function openText(n){
-  document.getElementById('overlay'+n).classList.add('show');
+function enterMain(){
+    document.getElementById('intro').style.display='none';
+    document.getElementById('main').style.display='block';
+}
+
+function openText(id){
+    document.getElementById(id).classList.add('show');
 }
 function closeText(){
-  document.getElementById('overlay1').classList.remove('show');
-  document.getElementById('overlay2').classList.remove('show');
+    document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('show'));
 }
+
+/* ❄ 눈 내림 효과 */
+const canvas = document.getElementById('snow');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let snowflakes = [];
+for(let i=0;i<200;i++){
+    snowflakes.push({
+        x:Math.random()*canvas.width,
+        y:Math.random()*canvas.height,
+        r:Math.random()*3+1,
+        d:Math.random()*1
+    });
+}
+
+function drawSnow(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle="white";
+    ctx.beginPath();
+    for(let i=0;i<snowflakes.length;i++){
+        let s=snowflakes[i];
+        ctx.moveTo(s.x,s.y);
+        ctx.arc(s.x,s.y,s.r,0,Math.PI*2,true);
+    }
+    ctx.fill();
+    updateSnow();
+}
+
+function updateSnow(){
+    for(let i=0;i<snowflakes.length;i++){
+        let s=snowflakes[i];
+        s.y+=s.d;
+        if(s.y>canvas.height){
+            s.y=0;
+            s.x=Math.random()*canvas.width;
+        }
+    }
+}
+
+setInterval(drawSnow,30);
 </script>
 
 </body>
