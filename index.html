@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Radien Archive</title>
 
-<!-- 다크 판타지 전용 폰트 -->
 <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Cormorant+Garamond:wght@300;500&display=swap" rel="stylesheet">
 
 <style>
@@ -16,7 +15,7 @@ body{
   color:#e6e0d6;
 }
 
-/* 배경 성 */
+/* 배경 */
 .bg{
   position:fixed;
   width:100%;
@@ -25,7 +24,7 @@ body{
   filter:brightness(0.25);
 }
 
-/* 눈 효과 */
+/* 눈 */
 .snow{
   position:fixed;
   width:100%;
@@ -36,7 +35,6 @@ body{
   animation:snow 25s linear infinite;
   opacity:0.35;
 }
-
 @keyframes snow{
   from{background-position:0 0;}
   to{background-position:0 1200px;}
@@ -56,7 +54,7 @@ body{
   z-index:2;
 }
 
-/* 이미지 배치 */
+/* 이미지 영역 */
 .container{
   position:relative;
   z-index:2;
@@ -67,41 +65,53 @@ body{
   gap:120px;
 }
 
-/* 카드 */
 .card{
   width:320px;
-  transition:0.4s;
   cursor:pointer;
+  transition:0.4s;
 }
-
 .card:hover{
   transform:scale(1.08);
   box-shadow:0 0 50px rgba(255,255,255,0.4);
 }
-
 .card img{
   width:100%;
   border-radius:12px;
 }
 
-/* 클릭 시 나오는 글 */
-.caption{
-  position:absolute;
-  bottom:8%;
-  width:60%;
-  left:20%;
+/* 글만 나오는 오버레이 */
+.overlay{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.92);
+  display:flex;
+  justify-content:center;
+  align-items:center;
   text-align:center;
+  padding:0 15%;
   font-family:'Cormorant Garamond', serif;
-  font-size:24px;
-  line-height:2.1;
-  color:#d8d3c8;
-  text-shadow:0 0 15px rgba(0,0,0,0.8);
+  font-size:28px;
+  line-height:2.2;
   opacity:0;
+  pointer-events:none;
   transition:0.6s;
+  z-index:5;
 }
 
-.show{
+.overlay.show{
   opacity:1;
+  pointer-events:auto;
+}
+
+/* 닫기 안내 */
+.closeHint{
+  position:absolute;
+  bottom:8%;
+  font-size:16px;
+  opacity:0.6;
 }
 </style>
 </head>
@@ -111,33 +121,38 @@ body{
 <div class="bg"></div>
 <div class="snow"></div>
 
-<!-- ✍️ 여기 대문 문구 네가 수정 -->
 <div class="title">
-여기에 대문 문구
+끊어줘
+  이 지옥 같은 굴레를.
 </div>
 
-<div class="container">
-  <div class="card" onclick="showText(1)">
+<div class="container" id="cards">
+  <div class="card" onclick="openText(1)">
     <img src="radien1.png">
   </div>
 
-  <div class="card" onclick="showText(2)">
+  <div class="card" onclick="openText(2)">
     <img src="radien2.png">
   </div>
 </div>
 
-
-<div id="text1" class="caption">
-쿵. 200년 동안 멈춰 있던 심장이, 돌처럼 굳어 있던 근육 덩어리가 미세하게 경련했다. 
-  마치 다시 뛰는 법을 기억해내려는 듯이. 
-  그의 단단한 팔이 당신을 조금 더 단단히, 조금 더 부드럽게 감쌌다. 
-  당신이라는 빛은 그를 죽일 독이다. 
-  "....잠시만. 이대로." 
-  그럼에도 그는 기꺼이 손을 뻗고 싶은 충동을 느꼈다. 
+<!-- 글 전용 화면 -->
+<div id="overlay1" class="overlay" onclick="closeText()">
+  <div>
+    쿵.
+200년 동안 멈춰 있던 심장이,
+돌처럼 굳어 있던 근육 덩어리가 미세하게 경련했다.
+마치 다시 뛰는 법을 기억해내려는 듯이.
+그의 팔이 당신을 조금 더 단단히, 조금 더 부드럽게 감쌌다.
+"...잠시만. 이대로.“당신이라는 빛은 그를 죽일 독이다.
+그럼에도 그는 기꺼이 손을 뻗고 싶은 충동을 느꼈다.
+    <div class="closeHint"></div>
+  </div>
 </div>
 
-<div id="text2" class="caption">
-그는 사람들의 반응을 본다.
+<div id="overlay2" class="overlay" onclick="closeText()">
+  <div>
+    그는 사람들의 반응을 본다.
 공포의 깊이를 측정하고, 그 안에 숨겨진 다른 것이 있는지 탐색한다.
 마침내, 그의 발걸음이 당신 앞에서 멈췄다.
 커다란 그림자가 당신을 덮는다.
@@ -148,13 +163,17 @@ body{
 "이름“
 그는 당신의 눈을 본다.
 표면 아래 감추어진 '진짜'를 찾는 사람처럼.
+    <div class="closeHint"></div>
+  </div>
 </div>
 
 <script>
-function showText(n){
-  document.getElementById('text1').classList.remove('show');
-  document.getElementById('text2').classList.remove('show');
-  document.getElementById('text'+n).classList.add('show');
+function openText(n){
+  document.getElementById('overlay'+n).classList.add('show');
+}
+function closeText(){
+  document.getElementById('overlay1').classList.remove('show');
+  document.getElementById('overlay2').classList.remove('show');
 }
 </script>
 
