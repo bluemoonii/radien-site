@@ -199,7 +199,7 @@ function scrollToContent(){
 function openOverlay(id, music){
     document.getElementById(id).classList.add('show');
 
-    bgm.volume = 0.05;
+    bgm.pause();   // ✅ 완전 정지
 
     characterAudio.pause();
     characterAudio.currentTime = 0;
@@ -210,12 +210,14 @@ function openOverlay(id, music){
     characterAudio.play();
 }
 
+
 function closeOverlay(){
     document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('show'));
 
     characterAudio.pause();
     characterAudio.currentTime = 0;
 
+    bgm.play();
     bgm.volume = 0.4;
 }
 
@@ -263,4 +265,5 @@ draw();
 
 </body>
 </html>
+
 
