@@ -115,7 +115,7 @@ canvas{
 <div class="vignette"></div>
 <canvas id="snow"></canvas>
 
-<div class="intro" onclick="scrollToContent()">
+<div class="intro" onclick="scrollToContent(); startBGM();">
     끊어줘. 이 지옥 같은 굴레를.
 </div>
 
@@ -173,11 +173,15 @@ const bgm = document.getElementById("bgm");
 const characterAudio = document.getElementById("characterAudio");
 let currentTrack = "";
 
-document.addEventListener("click", function startBGM(){
-    bgm.volume = 0.4;
-    bgm.play();
-    document.removeEventListener("click", startBGM);
-});
+let bgmStarted = false;
+
+function startBGM(){
+    if(!bgmStarted){
+        bgm.volume = 0.4;
+        bgm.play();
+        bgmStarted = true;
+    }
+}
 
 // 스크롤 효과
 const observer = new IntersectionObserver(entries=>{
@@ -259,3 +263,4 @@ draw();
 
 </body>
 </html>
+
