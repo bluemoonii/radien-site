@@ -16,7 +16,6 @@ body{
     overflow-x:hidden;
 }
 
-/* 🌌 배경 */
 .background{
     position:fixed;
     inset:0;
@@ -25,7 +24,6 @@ body{
     z-index:-2;
 }
 
-/* 🌫 어두운 그라데이션 */
 .vignette{
     position:fixed;
     inset:0;
@@ -33,7 +31,6 @@ body{
     z-index:-1;
 }
 
-/* ❄ 눈 */
 canvas{
     position:fixed;
     inset:0;
@@ -41,7 +38,6 @@ canvas{
     z-index:0;
 }
 
-/* 🏷 인트로 */
 .intro{
     height:100vh;
     display:flex;
@@ -53,7 +49,6 @@ canvas{
     cursor:pointer;
 }
 
-/* 📜 섹션 공통 */
 .section{
     min-height:100vh;
     display:flex;
@@ -63,7 +58,6 @@ canvas{
     padding:60px 24px;
 }
 
-/* 🖼 캐릭터 카드 */
 .card{
     width:min(92%,420px);
     margin:80px auto;
@@ -81,11 +75,10 @@ canvas{
     box-shadow:0 0 40px rgba(0,0,0,0.6);
 }
 
-/* ✍ 텍스트 오버레이 */
 .overlay{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,0.85);
+    background:rgba(0,0,0,0.9);
     display:flex;
     justify-content:center;
     align-items:center;
@@ -103,6 +96,16 @@ canvas{
     opacity:1;
     pointer-events:auto;
 }
+
+.download{
+    margin-top:30px;
+    cursor:pointer;
+    opacity:0.7;
+    font-size:14px;
+}
+.download:hover{
+    opacity:1;
+}
 </style>
 </head>
 
@@ -118,18 +121,17 @@ canvas{
 
 <div class="section">
 
-    <div class="card" onclick="openText('t1')">
+    <div class="card" onclick="openOverlay('t1','music/radien_theme1.mp3')">
         <img src="radien1.png">
     </div>
 
-    <div class="card" onclick="openText('t2')">
+    <div class="card" onclick="openOverlay('t2','music/radien_theme2.mp3')">
         <img src="radien2.png">
     </div>
 
 </div>
 
-<!-- 텍스트 -->
-<div id="t1" class="overlay" onclick="closeText()">
+<div id="t1" class="overlay" onclick="closeOverlay()">
 <div>
 <p>쿵. 200년 동안 멈춰 있던 심장이 미세하게 경련했다.</p>
 <p>돌처럼 굳어 있던 근육 덩어리가, 다시 뛰는 법을 기억해내려는 듯.</p>
@@ -137,12 +139,13 @@ canvas{
 <p>"... 잠시만. 이대로."</p>
 <p>당신이라는 빛은 그를 죽일 독이라는 걸 알고 있다.</p>
 <p>그럼에도 그는 기꺼이 손을 뻗었다.</p>
-    <p>비록 이 안식의 끝이</p>
-    <p>자신의 죽음일지라도.</p>
+<p>비록 이 안식의 끝이 자신의 죽음일지라도.</p>
+
+<div class="download" onclick="downloadMusic(event)">🎵 테마곡 다운로드</div>
 </div>
 </div>
 
-<div id="t2" class="overlay" onclick="closeText()">
+<div id="t2" class="overlay" onclick="closeOverlay()">
 <div>
 <p>그는 사람들의 반응을 본다.</p>
 <p>공포의 깊이를 측정하고, 숨겨진 무언가를 탐색한다.</p>
@@ -152,11 +155,31 @@ canvas{
 <p>"이름."</p>
 <p>그가 당신의 눈을 본다.</p>
 <p>표면 아래 감춰진 '진짜'를 찾는 사람처럼.</p>
+
+<div class="download" onclick="downloadMusic(event)">🎵 테마곡 다운로드</div>
 </div>
 </div>
 
+<audio id="bgm" loop>
+  <source src="music/bgm.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="characterAudio"></audio>
+
 <script>
-// 스크롤 등장 효과
+
+// BGM 시작
+const bgm = document.getElementById("bgm");
+const characterAudio = document.getElementById("characterAudio");
+let currentTrack = "";
+
+document.addEventListener("click", function startBGM(){
+    bgm.volume = 0.4;
+    bgm.play();
+    document.removeEventListener("click", startBGM);
+});
+
+// 스크롤 효과
 const observer = new IntersectionObserver(entries=>{
  entries.forEach(e=>{
    if(e.isIntersecting) e.target.classList.add('show');
@@ -164,20 +187,48 @@ const observer = new IntersectionObserver(entries=>{
 });
 document.querySelectorAll('.card').forEach(el=>observer.observe(el));
 
-// 인트로 클릭 시 스크롤
 function scrollToContent(){
     window.scrollTo({top:window.innerHeight, behavior:'smooth'});
 }
 
-// 오버레이
-function openText(id){
+// 오버레이 + 음악
+function openOverlay(id, music){
     document.getElementById(id).classList.add('show');
-}
-function closeText(){
-    document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('show'));
+
+    bgm.volume = 0.05;
+
+    characterAudio.pause();
+    characterAudio.currentTime = 0;
+
+    currentTrack = music;
+    characterAudio.src = music;
+    characterAudio.volume = 0.8;
+    characterAudio.play();
 }
 
-// 눈
+function closeOverlay(){
+    document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('show'));
+
+    characterAudio.pause();
+    characterAudio.currentTime = 0;
+
+    bgm.volume = 0.4;
+}
+
+// 다운로드
+function downloadMusic(e){
+    e.stopPropagation();
+    if(!currentTrack) return;
+
+    const link = document.createElement("a");
+    link.href = currentTrack;
+    link.download = currentTrack.split('/').pop();
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// 눈 효과
 const canvas=document.getElementById('snow');
 const ctx=canvas.getContext('2d');
 function resize(){canvas.width=innerWidth;canvas.height=innerHeight;}
@@ -203,6 +254,7 @@ function draw(){
  requestAnimationFrame(draw);
 }
 draw();
+
 </script>
 
 </body>
